@@ -28,9 +28,8 @@ export default function Home() {
               <span style={{ color: '#4ade80' }}>➜</span>
             </a>
             
-            {/* Si tienes tu CRM en otra ruta como /crm o manejas la lista */}
             <a 
-              href="/registro" 
+              href="/crm" 
               style={{ background: '#16a34a', color: '#fff', padding: '12px 16px', borderRadius: '8px', fontWeight: 'bold', textDecoration: 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
             >
               <span>👥 Ver Panel CRM de Clientes</span>
