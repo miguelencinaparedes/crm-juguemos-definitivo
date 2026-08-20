@@ -4,135 +4,83 @@ import { supabase } from '../supabaseClient';
 
 export default function RegistroJugador() {
   const [nombre, setNombre] = useState('');
-  const [whatsapp, setWhatsapp] = useState('');
-  const [cedula, setCedula] = useState('');
-  const [registrado, setRegistrado] = useState(false);
-  const [cargando, setCargando] = useState(false);
+  const [telefono, setTelefono] = useState('');
+  const [email, setEmail] = useState('');
+  const [enviado, setEnviado] = useState(false);
+  const [error, setError] = useState('');
 
-  async function handleSubmit(e: React.FormEvent) {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!nombre || !whatsapp || !cedula) {
-      alert('Por favor completa todos los campos obligatorios');
-      return;
+    setError('');
+
+    try {
+      const { data, error } = await supabase
+        .from('clientes') // Asegúrate de que tu tabla en Supabase se llama clientes o ajusta el nombre aquí
+        .insert([{ nombre, telefono, email }]);
+
+      if (error) throw error;
+      setEnviado(true);
+    } catch (err: any) {
+      setError('Hubo un error al registrarse. Inténtalo de nuevo.');
     }
-
-    setCargando(true);
-
-    const cedulaNum = Number(cedula.trim());
-
-    // 1. Verificamos si la cédula ya existe convirtiéndola a número
-    const { data: existenteCedula } = await supabase
-      .from('Clientes')
-      .select('Cedula')
-      .eq('Cedula', cedulaNum)
-      .maybeSingle();
-
-    if (existenteCedula) {
-      setCargando(false);
-      alert('⚠️ Este número de cédula ya se encuentra registrado. ¡Ya tienes una cuenta activa!');
-      return;
-    }
-
-    // 2. Verificamos si el WhatsApp ya existe
-    const { data: existenteWp } = await supabase
-      .from('Clientes')
-      .select('WhatsApp')
-      .eq('WhatsApp', whatsapp.trim())
-      .maybeSingle();
-
-    if (existenteWp) {
-      setCargando(false);
-      alert('⚠️ Este número de WhatsApp ya fue utilizado para un registro previo.');
-      return;
-    }
-
-    // 3. Guardamos el nuevo registro usando el número para la cédula
-    const { error } = await supabase.from('Clientes').insert([
-      {
-        Nombre: nombre.trim(),
-        WhatsApp: whatsapp.trim(),
-        Cedula: cedulaNum,
-        Estado: 'Nuevo'
-      }
-    ]);
-
-    setCargando(false);
-
-    if (error) {
-      alert('Error al registrarse: ' + error.message);
-    } else {
-      setRegistrado(true);
-    }
-  }
+  };
 
   return (
-    <main className="flex min-h-screen bg-gray-950 text-white font-sans justify-center items-center p-4">
-      <div className="w-full max-w-md bg-gray-900 border border-gray-800 rounded-2xl p-8 shadow-2xl">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-extrabold text-green-400">Juguemos.pro</h1>
-          <p className="text-sm text-gray-400 mt-2">¡Regístrate ahora y reclama tu bono de bienvenida!</p>
-        </div>
+    <main className="min-h-screen bg-slate-950 text-white flex items-center justify-center p-4">
+      <div className="max-w-md w-full bg-slate-900 border border-slate-800 rounded-xl p-8 shadow-2xl">
+        <h1 className="text-3xl font-bold text-center text-emerald-400 mb-2">Juguemos.pro</h1>
+        <p className="text-slate-400 text-center mb-6">Regístrate para comenzar a jugar y ganar</p>
 
-        {registrado ? (
-          <div className="text-center space-y-6">
-            <div className="bg-green-950 border border-green-600 rounded-xl p-6">
-              <h2 className="text-xl font-bold text-green-300 mb-2">¡Cuenta creada con éxito! 🎉</h2>
-              <p className="text-sm text-gray-300">Tu asesor está preparando tu bono de 20.000 Gs. Haz clic abajo para recibir tus accesos directamente en tu WhatsApp.</p>
-            </div>
-            
-            <a 
-              href={`https://wa.me/595983301903?text=${encodeURIComponent(`¡Hola! Me acabo de registrar en Juguemos.pro. Mi nombre es ${nombre} y quiero mi bono de 20.000 Gs.`)}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="block w-full py-4 bg-green-600 hover:bg-green-500 text-white font-bold rounded-xl transition-all shadow-lg text-sm"
-            >
-              💬 Abrir WhatsApp y Recibir Accesos
-            </a>
+        {enviado ? (
+          <div className="bg-emerald-900/50 border border-emerald-500 text-emerald-200 p-4 rounded-lg text-center">
+            <p className="font-bold text-lg mb-1">¡Registro exitoso!</p>
+            <p className="text-sm">Pronto nos pondremos en contacto contigo.</p>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
+            {error && <div className="bg-red-900/50 border border-red-500 text-red-200 p-3 rounded text-sm">{error}</div>}
+            
             <div>
-              <label className="block text-xs font-semibold text-gray-400 mb-1">Nombre y Apellido</label>
-              <input 
-                type="text" 
+              <label className="block text-sm font-medium text-slate-300 mb-1">Nombre y Apellido</label>
+              <input
+                type="text"
+                required
                 value={nombre}
                 onChange={(e) => setNombre(e.target.value)}
-                placeholder="Ej. Juan Pérez"
-                required
-                className="w-full bg-gray-950 border border-gray-800 rounded-lg px-4 py-3 text-sm text-white focus:outline-none focus:border-green-500"
+                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-emerald-500"
+                placeholder="Tu nombre completo"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-gray-400 mb-1">Número de WhatsApp</label>
-              <input 
-                type="text" 
-                value={whatsapp}
-                onChange={(e) => setWhatsapp(e.target.value)}
-                placeholder="Ej. 0991234567"
+              <label className="block text-sm font-medium text-slate-300 mb-1">Teléfono / WhatsApp</label>
+              <input
+                type="text"
                 required
-                className="w-full bg-gray-950 border border-gray-800 rounded-lg px-4 py-3 text-sm text-white focus:outline-none focus:border-green-500"
+                value={telefono}
+                onChange={(e) => setTelefono(e.target.value)}
+                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-emerald-500"
+                placeholder="+595..."
               />
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-gray-400 mb-1">Cédula de Identidad</label>
-              <input 
-                type="number" 
-                value={cedula}
-                onChange={(e) => setCedula(e.target.value)}
-                placeholder="Ej. 1234567"
+              <label className="block text-sm font-medium text-slate-300 mb-1">Correo Electrónico</label>
+              <input
+                type="email"
                 required
-                className="w-full bg-gray-950 border border-gray-800 rounded-lg px-4 py-3 text-sm text-white focus:outline-none focus:border-green-500"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-emerald-500"
+                placeholder="tucorreo@email.com"
               />
             </div>
 
-            <button 
-              type="submit" 
-              disabled={cargando}
-              className="w-full mt-4 py-3.5 bg-green-600 hover:bg-green-500 text-white font-bold rounded-lg transition-all shadow-lg text-sm"
+            <button
+              type="submit"
+              className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-lg transition-colors shadow-lg"
             >
-              {cargando ? 'Verificando...' : '¡Obtener Bono y Jugar!'}
+              Registrarme Ahora
             </button>
           </form>
         )}
