@@ -11,8 +11,7 @@ export default function Home() {
     async function cargarClientes() {
       const { data, error } = await supabase
         .from('Clientes')
-        .select('*')
-        .order('created_at', { ascending: false });
+        .select('*');
 
       if (error) {
         console.error('Error al cargar clientes:', error.message);
