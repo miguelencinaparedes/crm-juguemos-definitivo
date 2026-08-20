@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { supabase } from './supabaseClient';
 
 export default function Home() {
@@ -8,20 +8,23 @@ export default function Home() {
   const cajerosDisponibles = ['Cajero 1 - Juan', 'Cajero 2 - María', 'Cajero 3 - Carlos', 'Cajero 4 - Soporte General'];
 
   const [clientes, setClientes] = useState<any[]>([]);
-  const [cargando,setCargando] = useState(false);
+  const [cargando, setCargando] = useState(false);
 
   async function cargarClientes() {
-    setCargando(true);
-    const { data } = await supabase.from('Clientes').select('*');
-    if (data) setClientes(data);
-    setCargando(false);
-  }
-
-  useEffect(() => {
-    if (vista === 'crm') {
-      cargarClientes();
+    try {
+      setCargando(true);
+      const { data, error } = await supabase.from('Clientes').select('*');
+      if (data) {
+        setClientes(data);
+      } else if (error) {
+        alert('Error al cargar: ' + error.message);
+      }
+    } catch (e: any) {
+      alert('Excepción: ' + e.message);
+    } finally {
+      setCargando(false);
     }
-  }, [vista]);
+  }
 
   return (
     <main style={{ padding: '30px 20px', background: '#030712', color: '#fff', minHeight: '100vh', fontFamily: 'sans-serif', display: 'flex', justifyContent: 'center' }}>
@@ -29,13 +32,11 @@ export default function Home() {
         
         {vista === 'menu' ? (
           <>
-            {/* Encabezado */}
             <div style={{ textAlign: 'center', marginBottom: '30px' }}>
               <h1 style={{ color: '#4ade80', fontSize: '28px', marginBottom: '8px' }}>Juguemos.pro</h1>
               <p style={{ color: '#9ca3af', fontSize: '14px', margin: 0 }}>Panel de Control y Distribución de Cajeros</p>
             </div>
             
-            {/* Botones de Acceso */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', marginBottom: '30px' }}>
               <a 
                 href="/registro" 
@@ -46,7 +47,7 @@ export default function Home() {
               </a>
 
               <button 
-                onClick={() => setVista('crm')}
+                onClick={() => { setVista('crm'); cargarClientes(); }}
                 style={{ background: '#16a34a', border: 'none', padding: '14px', borderRadius: '10px', color: '#fff', fontWeight: 'bold', display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer', width: '100%', textAlign: 'left' }}
               >
                 <span>👥 Ver Listado de Clientes (CRM)</span>
@@ -54,7 +55,6 @@ export default function Home() {
               </button>
             </div>
 
-            {/* Módulo de Cajeros */}
             <div style={{ background: '#111827', border: '1px solid #1f2937', borderRadius: '12px', padding: '20px' }}>
               <h2 style={{ fontSize: '16px', color: '#fff', marginBottom: '10px' }}>⚡ Control de Cajeros Activos</h2>
               <p style={{ color: '#9ca3af', fontSize: '13px', marginBottom: '15px' }}>
@@ -89,7 +89,6 @@ export default function Home() {
           </>
         ) : (
           <>
-            {/* Vista del CRM de Clientes */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #1f2937', paddingBottom: '15px', marginBottom: '20px' }}>
               <div>
                 <button 
@@ -111,7 +110,7 @@ export default function Home() {
             {cargando ? (
               <div style={{ textAlign: 'center', padding: '40px', color: '#6b7280' }}>Cargando registros...</div>
             ) : clientes.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: '40px', color: '#6b7280' }}>No hay clientes registrados todavía.</div>
+              <div style={{ textAlign: 'center', padding: '40px', color: '#6b7280' }}>No hay clientes registrados todavía o pulsa Actualizar.</div>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 {clientes.map((cliente, index) => (
