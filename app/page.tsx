@@ -4,30 +4,18 @@ import { supabase } from './supabaseClient';
 
 export default function Home() {
   const [clientes, setClientes] = useState<any[]>([]);
+  const [cargando,setCargando] = useState(true);
 
   useEffect(() => {
     async function cargarClientes() {
-      const { data } = await supabase.from('Clientes').select('*');
-      if (data) setClientes(data);
+      const { data, error } = await supabase.from('Clientes').select('*');
+      if (data) {
+        setClientes(data);
+      }
+      setCargando(false);
     }
 
     cargarClientes();
-
-    // Suscripción en tiempo real
-    const channel = supabase
-      .channel('realtime-clientes-admin')
-      .on(
-        'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'Clientes' },
-        (payload) => {
-          setClientes((prev) => [payload.new, ...prev]);
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
   }, []);
 
   return (
@@ -35,11 +23,21 @@ export default function Home() {
       <div className="w-full max-w-4xl space-y-6">
         <div className="flex justify-between items-center border-b border-gray-800 pb-4">
           <h1 className="text-2xl font-bold text-green-400">Juguemos.pro - Panel CRM</h1>
-          <span className="text-sm text-gray-400">Total Clientes: {clientes.length}</span>
+          <div className="flex items-center gap-4">
+            <span className="text-sm text-gray-400">Total Clientes: {clientes.length}</span>
+            <button 
+              onClick={() => window.location.reload()} 
+              className="px-3 py-1.5 bg-gray-800 hover:bg-gray-700 text-xs rounded-lg text-gray-200 transition-all"
+            >
+              🔄 Actualizar
+            </button>
+          </div>
         </div>
 
-        {clientes.length === 0 ? (
-          <div className="text-center py-20 text-gray-500">Cargando o sin registros...</div>
+        {cargando ? (
+          <div className="text-center py-20 text-gray-400">Cargando registros...</div>
+        ) : clientes.length === 0 ? (
+          <div className="text-center py-20 text-gray-500">No hay clientes registrados todavía.</div>
         ) : (
           <div className="space-y-3">
             {clientes.map((cliente, index) => (
