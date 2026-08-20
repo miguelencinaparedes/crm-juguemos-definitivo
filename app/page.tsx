@@ -6,25 +6,60 @@ export default function Home() {
   const [clientes, setClientes] = useState<any[]>([]);
 
   useEffect(() => {
-    async function cargar() {
+    async function cargarClientes() {
       const { data } = await supabase.from('Clientes').select('*');
       if (data) setClientes(data);
     }
-    cargar();
+    
+    cargarClientes();
+
+    // Suscripción en tiempo real para nuevos registros
+    const channel = supabase
+      .channel('realtime-clientes-admin')
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'Clientes' },
+        (payload) => {
+          setClientes((prev) => [payload.new, ...prev]);
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   return (
-    <main style={{ padding: '30px', background: '#030712', color: '#fff', minHeight: '100vh', fontFamily: 'sans-serif' }}>
-      <h1 style={{ color: '#4ade80', fontSize: '24px', marginBottom: '20px' }}>Juguemos.pro - Panel CRM</h1>
-      <p style={{ marginBottom: '20px' }}>Total de clientes: {clientes.length}</p>
-      
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-        {clientes.map((c, i) => (
-          <div key={i} style={{ background: '#111827', padding: '15px', borderRadius: '8px', border: '1px solid #1f2937' }}>
-            <h3 style={{ margin: '0 0 5px 0', color: '#fff' }}>{c.Nombre}</h3>
-            <p style={{ margin: '0', color: '#9ca3af', fontSize: '14px' }}>WhatsApp: {c.WhatsApp} | Cédula: {c.Cedula}</p>
+    <main className="flex min-h-screen bg-gray-950 text-white font-sans p-6 justify-center">
+      <div className="w-full max-w-4xl space-y-6">
+        <div className="flex justify-between items-center border-b border-gray-800 pb-4">
+          <h1 className="text-2xl font-extrabold text-green-400">Juguemos.pro - Panel CRM</h1>
+          <span className="text-sm text-gray-400">Total Clientes: <strong className="text-white">{clientes.length}</strong></span>
+        </div>
+
+        {clientes.length === 0 ? (
+          <div className="text-center py-20 text-gray-500">Cargando registros...</div>
+        ) : (
+          <div className="space-y-3">
+            {clientes.map((cliente, index) => (
+              <div key={index} className="bg-gray-900 border border-gray-800 rounded-xl p-4 flex justify-between items-center shadow-lg">
+                <div>
+                  <h2 className="font-bold text-lg text-white">{cliente.Nombre}</h2>
+                  <p className="text-sm text-gray-400">📱 WhatsApp: {cliente.WhatsApp} | 🆔 Cédula: {cliente.Cedula}</p>
+                </div>
+                <a
+                  href={`https://wa.me/${cliente.WhatsApp?.replace(/\D/g, '')}?text=${encodeURIComponent(`¡Hola ${cliente.Nombre}! Vemos que te registraste en Juguemos.pro. Aquí tienes tus accesos y tu bono de bienvenida.`)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-4 py-2 bg-green-600 hover:bg-green-500 text-white font-bold rounded-lg text-xs shadow transition-all"
+                >
+                  💬 Escribir al WhatsApp
+                </a>
+              </div>
+            ))}
           </div>
-        ))}
+        )}
       </div>
     </main>
   );
