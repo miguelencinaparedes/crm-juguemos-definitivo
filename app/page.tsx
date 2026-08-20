@@ -13,7 +13,7 @@ export default function Home() {
     
     cargarClientes();
 
-    // Suscripción en tiempo real para nuevos registros
+    // Suscripción en tiempo real
     const channel = supabase
       .channel('realtime-clientes-admin')
       .on(
@@ -31,28 +31,28 @@ export default function Home() {
   }, []);
 
   return (
-    <main className="flex min-h-screen bg-gray-950 text-white font-sans p-6 justify-center">
-      <div className="w-full max-w-4xl space-y-6">
-        <div className="flex justify-between items-center border-b border-gray-800 pb-4">
-          <h1 className="text-2xl font-extrabold text-green-400">Juguemos.pro - Panel CRM</h1>
-          <span className="text-sm text-gray-400">Total Clientes: <strong className="text-white">{clientes.length}</strong></span>
+    <main style={{ padding: '30px', background: '#030712', color: '#fff', minHeight: '100vh', fontFamily: 'sans-serif', display: 'flex', justifyContent: 'center' }}>
+      <div style={{ width: '100%', maxWidth: '800px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #1f2937', paddingBottom: '15px', marginBottom: '20px' }}>
+          <h1 style={{ color: '#4ade80', fontSize: '24px', fontWeight: 'bold', margin: 0 }}>Juguemos.pro - Panel CRM</h1>
+          <span style={{ color: '#9ca3af', fontSize: '14px' }}>Total Clientes: <strong style={{ color: '#fff' }}>{clientes.length}</strong></span>
         </div>
 
         {clientes.length === 0 ? (
-          <div className="text-center py-20 text-gray-500">Cargando registros...</div>
+          <div style={{ textAlign: 'center', padding: '60px 0', color: '#6b7280' }}>Cargando registros...</div>
         ) : (
-          <div className="space-y-3">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             {clientes.map((cliente, index) => (
-              <div key={index} className="bg-gray-900 border border-gray-800 rounded-xl p-4 flex justify-between items-center shadow-lg">
+              <div key={index} style={{ background: '#111827', border: '1px solid #1f2937', borderRadius: '12px', padding: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', boxShadow: '0 4px 6px rgba(0,0,0,0.3)' }}>
                 <div>
-                  <h2 className="font-bold text-lg text-white">{cliente.Nombre}</h2>
-                  <p className="text-sm text-gray-400">📱 WhatsApp: {cliente.WhatsApp} | 🆔 Cédula: {cliente.Cedula}</p>
+                  <h2 style={{ margin: '0 0 6px 0', color: '#fff', fontSize: '18px' }}>{cliente.Nombre}</h2>
+                  <p style={{ margin: 0, color: '#9ca3af', fontSize: '14px' }}>📱 WhatsApp: {cliente.WhatsApp} | 🆔 Cédula: {cliente.Cedula}</p>
                 </div>
                 <a
                   href={`https://wa.me/${cliente.WhatsApp?.replace(/\D/g, '')}?text=${encodeURIComponent(`¡Hola ${cliente.Nombre}! Vemos que te registraste en Juguemos.pro. Aquí tienes tus accesos y tu bono de bienvenida.`)}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-4 py-2 bg-green-600 hover:bg-green-500 text-white font-bold rounded-lg text-xs shadow transition-all"
+                  style={{ background: '#16a34a', color: '#fff', padding: '10px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 'bold', textDecoration: 'none', whiteSpace: 'nowrap', transition: 'background 0.2s' }}
                 >
                   💬 Escribir al WhatsApp
                 </a>
