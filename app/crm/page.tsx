@@ -1,18 +1,25 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { supabase } from '../supabaseClient';
+import { supabase } from '../../supabaseClient';
 
 export default function CrmPage() {
   const [clientes, setClientes] = useState<any[]>([]);
   const [cargando, setCargando] = useState(true);
 
   async function cargarClientes() {
-    setCargando(true);
-    const { data } = await supabase.from('Clientes').select('*');
-    if (data) {
-      setClientes(data);
+    try {
+      setCargando(true);
+      const { data, error } = await supabase.from('Clientes').select('*');
+      if (data) {
+        setClientes(data);
+      } else if (error) {
+        console.error('Error Supabase:', error.message);
+      }
+    } catch (e) {
+      console.error('Excepción:', e);
+    } finally {
+      setCargando(false);
     }
-    setCargando(false);
   }
 
   useEffect(() => {
