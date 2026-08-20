@@ -1,7 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 
-// Usamos el operador '||' para evitar que falle si la variable está indefinida
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://tu-url-de-supabase.supabase.co';
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'tu-anon-key';
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://hozvongacraetwmyipqv.supabase.co';
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'sb_publishable_Vv9XycgQnSMRvqQ0e8EeGQ_4w71DYqb';
 
 export const supabase = createClient(supabaseUrl, supabaseKey);
