@@ -8,7 +8,7 @@ export default function Home() {
 
   async function cargarClientes() {
     setCargando(true);
-    const { data, error } = await supabase.from('Clientes').select('*');
+    const { data } = await supabase.from('Clientes').select('*');
     if (data) {
       setClientes(data);
     }
