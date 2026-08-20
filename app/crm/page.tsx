@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { supabase } from '../../supabaseClient';
+import { supabase } from '../supabaseClient';
 
 export default function CrmPage() {
   const [clientes, setClientes] = useState<any[]>([]);
